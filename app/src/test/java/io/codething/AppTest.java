@@ -9,12 +9,14 @@ import org.junit.jupiter.api.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
+
 import org.hamcrest.Matchers.*;
 
 class TrackerAppTest {
-    @Test void appHasThings() {
+    @Test
+    void appHasThings() {
         TrackerApp app = new TrackerApp();
-        
+
         assertThat(app.totalActivities(), is(0));
     }
 }
