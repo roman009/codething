@@ -3,20 +3,127 @@
  */
 package io.codething;
 
-import org.junit.jupiter.api.Assertions;
+import io.codething.activity.RunningActivity;
+import io.codething.activity.SwimmingActivity;
+import io.codething.activity.WalkingActivity;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.hamcrest.Matchers.*;
+import java.util.UUID;
 
 class TrackerAppTest {
-    @Test
-    void appHasThings() {
-        TrackerApp app = new TrackerApp();
+    private TrackerApp app;
+    private User user1;
+    private User user2;
 
+    @BeforeEach
+    void setUp() {
+        app = new TrackerApp();
+        user1 = User.builder()
+                .id(UUID.randomUUID())
+                .bmr(2000)
+                .build();
+        user2 = User.builder()
+                .id(UUID.randomUUID())
+                .bmr(1800)
+                .build();
+    }
+
+    @Test
+    void shouldStartWithNoActivities() {
         assertThat(app.totalActivities(), is(0));
+        assertThat(app.totalCalories(), is(0));
+        assertThat(app.totalDuration(), is(0));
+    }
+
+    @Test
+    void shouldCalculateTotalActivities() {
+        RunningActivity running = RunningActivity.builder()
+                .distance(5000)
+                .duration(30)
+                .build();
+        WalkingActivity walking = WalkingActivity.builder()
+                .distance(3000)
+                .duration(45)
+                .build();
+
+        app.addActivity(user1, running);
+        app.addActivity(user1, walking);
+
+        assertThat(app.totalActivities(), is(2));
+    }
+
+    @Test
+    void shouldCalculateTotalCaloriesForSingleUser() {
+        RunningActivity running = RunningActivity.builder()
+                .distance(5000)
+                .duration(30)
+                .build();
+
+        app.addActivity(user1, running);
+
+        assertThat(app.getTotalCaloriesForUser(user1), is(61800));
+    }
+
+    @Test
+    void shouldCalculateTotalCaloriesFromActivityForUser() {
+        SwimmingActivity swimming = SwimmingActivity.builder()
+                .distance(1000)
+                .duration(45)
+                .build();
+
+        app.addActivity(user1, swimming);
+
+        assertThat(app.getTotalCaloriesFromActivityForUser(user1), is(6075));
+    }
+
+    @Test
+    void shouldCalculateTotalCaloriesFromBmrForUser() {
+        WalkingActivity walking = WalkingActivity.builder()
+                .distance(3000)
+                .duration(60)
+                .build();
+
+        app.addActivity(user1, walking);
+
+        assertThat(app.getTotalCaloriesFromBmrForUser(user1), is(120000));
+    }
+
+    @Test
+    void shouldCalculateTotalCaloriesForMultipleUsers() {
+        RunningActivity running1 = RunningActivity.builder()
+                .distance(5000)
+                .duration(30)
+                .build();
+        SwimmingActivity swimming2 = SwimmingActivity.builder()
+                .distance(1000)
+                .duration(45)
+                .build();
+
+        app.addActivity(user1, running1);
+        app.addActivity(user2, swimming2);
+
+        assertThat(app.totalCalories(), is(148875));
+    }
+
+    @Test
+    void shouldCalculateTotalDuration() {
+        RunningActivity running = RunningActivity.builder()
+                .distance(5000)
+                .duration(30)
+                .build();
+        WalkingActivity walking = WalkingActivity.builder()
+                .distance(3000)
+                .duration(45)
+                .build();
+
+        app.addActivity(user1, running);
+        app.addActivity(user2, walking);
+
+        assertThat(app.totalDuration(), is(75));
     }
 }
